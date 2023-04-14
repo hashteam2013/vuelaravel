@@ -1,22 +1,30 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use App\Models\Event;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 class EventController extends Controller{
+    /******************** 
+     * 
+     *    EVENT LISTING 
+     * 
+    *********************/
     public function list(Request $request){
-          try{
+        try{
             $data=Event::with(['eventtype'])->get();
             return $this->response($this->success,200,$data,'Events list fetched successfully ');
           }
           catch(Exception $ex){
-            return $this->response($this->faliure,500,'',$ex->getMessage());
+            return $this->response($this->faliure,500,'',$this->errorMessage);
           }
-     }
+        }
+    /******************** 
+     * 
+     *  CREATE  NEW EVENT
+     * 
+    *********************/        
      public function create(Request $request){
         try{ 
             $validator = Validator::make($request->all(), [
@@ -28,11 +36,10 @@ class EventController extends Controller{
                 'type_id'=>'Type is required',
                 'description'=>'Description is required' 
             ]);
-           
-            if ($validator->fails()) {
+            /**  IF VALIDATION FAILED  ***/
+            if ($validator->fails()) { 
                 return response()->json(['errors' => $validator->errors(),'status'=>'validErr']);
             }
-    
             if($request->file('image')){
                 $path='public/';
                 $photo=$request->file('image')->getClientOriginalName();
@@ -49,6 +56,11 @@ class EventController extends Controller{
             return $this->response($this->faliure,500,'',$this->errorMessage);
         }           
       }
+    /*********************** 
+     * 
+     *   GET EVENT INFORMATION 
+     * 
+    ************************/      
      public function get(Request $request,$id){
         try{ 
             $data= Event::where('id',$id)->first();
@@ -56,9 +68,13 @@ class EventController extends Controller{
         }
         catch(Exception $ex){
             return $this->response($this->faliure,500,'',$this->errorMessage);
-        }             
-
+         }             
         }
+    /******************** 
+     * 
+     *   UPDATE EVENT  
+     * 
+    *********************/        
      public function update(Request $request){
         $validator = Validator::make($request->all(), [
             'event_name' => 'required',
@@ -69,10 +85,10 @@ class EventController extends Controller{
             'type_id'=>'Type is required',
             'description'=>'Description is required' 
         ]);
+        /******IF VALIDATION FAILED*********** */
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors(),'status'=>'validErr']);
         }
-
         try{
             if($request->file('image')){
                 $path='public/';
@@ -92,8 +108,12 @@ class EventController extends Controller{
         catch(Exception $ex){
             return $this->response($this->faliure,500,'',$this->errorMessage);
         }                   
-           
      }
+    /******************** 
+     * 
+     *   DELETE  EVENT  
+     * 
+    *********************/     
      public function delete(Request $request){
         try{
             Event::where('id',$request->event_id)->delete();

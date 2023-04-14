@@ -26,7 +26,6 @@ textarea.form-control {
         <h3>Add Event</h3> 
       </div>
       <div class="col-auto">
-
       </div>
     </div>
     <div class="row mb-2">
@@ -137,11 +136,12 @@ import 'vue3-toastify/dist/index.css';
         return false;
       }
       else{
-
+let  token =  localStorage.getItem('laravelvuetoken');
         let formdata= new FormData(document.getElementById('event-form-id'));
                axios.post('http://127.0.0.1:8000/api/event/create',formdata ,{
           headers: {
-                 'Content-Type': 'multipart/form-data'
+                 'Content-Type': 'multipart/form-data',
+                 "Authorization" : `Bearer ${token}`
                 }
             }
            ).then(function(response){
@@ -169,7 +169,14 @@ import 'vue3-toastify/dist/index.css';
                       position: toast.POSITION.TOP_RIGHT,
                       type:'success'
                     });
-                        self.$router.push({ path: '/' });
+                        self.$router.push({ path: '/list' });
+             }
+              if(response.data.status=='faliure'){
+                localStorage.removeItem("laravelvuetoken");
+                  toast.error(response.data.message, {
+                  position: toast.POSITION.TOP_RIGHT,
+                });
+                self.$router.push('/');
              }
 
            }).catch(function(response){
@@ -182,7 +189,7 @@ import 'vue3-toastify/dist/index.css';
       
  },
  list(){
-    this.$router.push({ path: '/' });
+    this.$router.push({ path: '/list' });
  },
   edit(){
     this.$router.push({ path: 'edit' });

@@ -129,9 +129,16 @@ import 'vue3-toastify/dist/index.css';
   },
  mounted(){
   self=this;
-      axios.get('http://127.0.0.1:8000/api/event/edit/'+this.$route.params.id)
+  let  token =  localStorage.getItem('laravelvuetoken');
+      axios.get('http://127.0.0.1:8000/api/event/edit/'+this.$route.params.id,  { headers: {"Authorization" : `Bearer ${token}`}})
           .then(function(response){
-              console.log(response);
+            if(response.data.status=='faliure'){
+                localStorage.removeItem("laravelvuetoken");
+                  toast.error(response.data.message, {
+                  position: toast.POSITION.TOP_RIGHT,
+                });
+                self.$router.push('/');
+             }
               self.selected=response.data.data.type_id;
               self.description=response.data.data.description;
               self.event_name=response.data.data.event_name;
@@ -140,7 +147,7 @@ import 'vue3-toastify/dist/index.css';
           })
           .catch(function(response){
 
-            console.log(response);
+
           });
  },
  validations: {
@@ -158,13 +165,14 @@ import 'vue3-toastify/dist/index.css';
         return false;
       }
       else{
-
+let  token =  localStorage.getItem('laravelvuetoken')
         let formdata= new FormData(document.getElementById('event-form-id'));
           formdata.append('event_id',self.event_id);
           formdata.append('oldimage',self.oldimage);
                axios.post('http://127.0.0.1:8000/api/event/update',formdata ,{
           headers: {
-                 'Content-Type': 'multipart/form-data'
+                 'Content-Type': 'multipart/form-data',
+                  "Authorization" : `Bearer ${token}`
                 }
             }
            ).then(function(response){
@@ -192,7 +200,7 @@ import 'vue3-toastify/dist/index.css';
                       position: toast.POSITION.TOP_RIGHT,
                       type:'success'
                     });
-                        self.$router.push({ path: '/' });
+                        self.$router.push({ path: '/list' });
              }
 
            }).catch(function(response){

@@ -27,6 +27,8 @@
 </template> 
 <script>
 import  {ClickRowArgument } from "vue3-easy-data-table";
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
  import axios from "axios";
  export default{
  data () {
@@ -43,14 +45,24 @@ import  {ClickRowArgument } from "vue3-easy-data-table";
   
 mounted(){
       self=this;
-    axios.get('http://127.0.0.1:8000/api/event/list')
+      var  token =  localStorage.getItem('laravelvuetoken');
+    axios.get('http://127.0.0.1:8000/api/event/list', { headers: {"Authorization" : `Bearer ${token}`}} )
           .then(function(response){
             console.log(response);
+              if(response.data.status=='faliure'){
+               // localStorage.removeItem("laravelvuetoken");
+                  toast.error(response.data.message, {
+                  position: toast.POSITION.TOP_RIGHT,
+                });
+                self.$router.push('/');
+             }
              self.items=response.data.data; 
           })
           .catch(function(response){
-            alert("error");
-            console.log(response);
+           toast.error(response.data.message, {
+                  position: toast.POSITION.TOP_RIGHT,
+                });
+         //  localStorage.removeItem('laravelvuetoken');
           });
 },
 methods:{
